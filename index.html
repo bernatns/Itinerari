@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>itinerari//</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #f2f3f7; color: #1a1a2e; min-height: 100vh; }
+  .app { max-width: 480px; margin: 0 auto; padding-bottom: 100px; }
+
+  .topbar { background: white; padding: 16px 20px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e8eaee; position: sticky; top: 0; z-index: 10; }
+  .topbar-title { font-size: 18px; font-weight: 700; color: #1a6de0; letter-spacing: -0.3px; }
+  .topbar-sub { font-size: 12px; color: #9aa3b0; margin-top: 1px; }
+  .topbar-badge { font-size: 11px; font-weight: 600; color: #9aa3b0; background: #f2f3f7; padding: 4px 10px; border-radius: 20px; }
+
+  .section-label { font-size: 11px; font-weight: 700; color: #9aa3b0; text-transform: uppercase; letter-spacing: 0.7px; padding: 20px 20px 8px; }
+
+  .card { background: white; border-radius: 16px; margin: 0 12px 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+  input, select, textarea { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500; padding: 12px 14px; border: 1.5px solid #e4e7ef; border-radius: 12px; background: #f8f9fb; color: #1a1a2e; outline: none; width: 100%; transition: border-color .15s, background .15s; -webkit-appearance: none; appearance: none; }
+  input:focus, select:focus, textarea:focus { border-color: #1a6de0; background: white; }
+  input::placeholder, textarea::placeholder { color: #b0b8c8; font-weight: 400; }
+  .field-label { font-size: 11px; font-weight: 700; color: #9aa3b0; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 7px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .seg-ctrl { display: flex; background: #f2f3f7; border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+  .seg-btn { flex: 1; padding: 9px 6px; border: none; border-radius: 10px; background: transparent; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #9aa3b0; cursor: pointer; transition: all .15s; }
+  .seg-btn.active { background: white; color: #1a6de0; box-shadow: 0 1px 4px rgba(0,0,0,0.10); }
+
+  .t-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .t-pill { padding: 8px 13px; border-radius: 25px; border: 1.5px solid #e4e7ef; background: #f8f9fb; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #6b7a8d; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+  .t-pill.active { border-color: #1a6de0; background: #e8f0fd; color: #1a6de0; }
+  .t-pill:hover:not(.active) { border-color: #b8c7e8; background: #f0f4ff; }
+
+  .btn-primary { width: 100%; padding: 15px; background: #1a6de0; color: white; border: none; border-radius: 14px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
+  .btn-primary:hover { background: #155cc4; }
+  .btn-primary:disabled { background: #aab8d8; cursor: not-allowed; }
+  .btn-wrap { padding: 4px 12px 12px; }
+
+  .btn-ghost { padding: 9px 14px; background: #e8f0fd; color: #1a6de0; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; white-space: nowrap; flex-shrink: 0; }
+  .btn-ghost:hover { background: #d0e2fa; }
+  .btn-ghost:disabled { background: #f2f3f7; color: #b0b8c8; cursor: not-allowed; }
+  .btn-ghost-full { width: 100%; text-align: center; }
+  .btn-remove { padding: 5px 9px; background: #fff0f2; color: #e53e3e; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .btn-remove:hover { background: #ffd6da; }
+
+  .banner { margin: 0 12px 12px; background: #e8f0fd; border-radius: 14px; padding: 13px 16px; font-size: 13px; font-weight: 600; color: #1a6de0; display: flex; align-items: center; gap: 8px; }
+
+  .ac-wrap { position: relative; margin-bottom: 12px; }
+  .ac-row { display: flex; gap: 8px; }
+  .ac-row input { flex: 1; }
+  .ac-drop { position: absolute; top: calc(100% + 5px); left: 0; right: 0; z-index: 50; background: white; border: 1.5px solid #1a6de0; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(26,109,224,.13); }
+  .ac-item { padding: 11px 14px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background .1s; display: flex; align-items: center; gap: 8px; color: #1a1a2e; }
+  .ac-item:hover { background: #f0f5ff; }
+  .ac-badge { font-size: 10px; color: #9aa3b0; margin-left: auto; font-weight: 600; }
+  .ac-loading { padding: 11px 14px; font-size: 13px; color: #9aa3b0; display: flex; align-items: center; gap: 8px; }
+
+  .place-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #f8f9fb; border-radius: 12px; margin-bottom: 8px; border: 1.5px solid #e4e7ef; }
+  .place-item:last-child { margin-bottom: 0; }
+  .place-num { width: 26px; height: 26px; border-radius: 50%; background: #1a6de0; color: white; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .place-name { flex: 1; font-size: 14px; font-weight: 600; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .chip { padding: 7px 13px; border-radius: 20px; border: 1.5px solid #1a6de0; background: white; color: #1a6de0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .chip:hover { background: #1a6de0; color: white; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 18px; height: 18px; flex-shrink: 0; border: 2.5px solid #dde4f5; border-top-color: #1a6de0; border-radius: 50%; animation: spin .7s linear infinite; }
+  .loader { display: flex; align-items: center; gap: 9px; padding: 14px 0; font-size: 13px; font-weight: 600; color: #9aa3b0; }
+  .error-box { background: #fff0f2; border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 600; color: #e53e3e; margin-top: 10px; }
+  .empty-msg { font-size: 13px; color: #b0b8c8; font-weight: 500; padding: 4px 0; }
+
+  .day-card { background: white; border-radius: 16px; margin: 0 12px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
+  .day-head { padding: 14px 18px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #f0f2f7; }
+  .day-n { font-size: 30px; font-weight: 700; color: #1a6de0; line-height: 1; min-width: 36px; }
+  .day-title { font-size: 15px; font-weight: 700; }
+  .day-date { font-size: 12px; color: #9aa3b0; font-weight: 500; margin-top: 2px; }
+  .stop { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #f0f2f7; }
+  .stop:last-child { border-bottom: none; }
+  .stop-ico { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .stop-body { flex: 1; }
+  .stop-top { display: flex; align-items: baseline; gap: 8px; }
+  .stop-name { font-size: 14px; font-weight: 700; }
+  .stop-hora { font-size: 12px; color: #9aa3b0; font-weight: 500; }
+  .stop-desc { font-size: 13px; color: #5a6475; line-height: 1.55; margin-top: 3px; font-weight: 500; }
+  .stop-transp { font-size: 11px; color: #9aa3b0; margin-top: 5px; font-weight: 600; }
+
+  .hidden { display: none !important; }
+  .suggest-row { display: flex; align-items: center; justify-content: space-between; }
+  .suggest-label { font-size: 13px; font-weight: 600; color: #5a6475; }
+  .mt8 { margin-top: 8px; }
+  .mt12 { margin-top: 12px; }
+  .ac-hint { font-size: 12px; color: #9aa3b0; font-weight: 600; margin-top: 12px; margin-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">itinerari//</div>
+      <div class="topbar-sub">planificador de viatges</div>
+    </div>
+    <div class="topbar-badge hidden" id="trip-badge"></div>
+  </div>
+
+  <!-- ══ SETUP ══ -->
+  <div id="setup-panel">
+    <div class="section-label">Destinació</div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label">On vols anar?</label>
+        <input id="dest" type="text" placeholder="Ex: Kyoto · Costa Brava · Nova York" onkeydown="if(event.key==='Enter') initTrip()">
+      </div>
+    </div>
+
+    <div class="section-label">Durada</div>
+    <div class="card">
+      <div class="seg-ctrl">
+        <button class="seg-btn active" id="seg-dates" onclick="setMode('dates')">📅 Dates concretes</button>
+        <button class="seg-btn" id="seg-days" onclick="setMode('days')">🔢 Nombre de dies</button>
+      </div>
+      <div id="panel-dates" class="row2">
+        <div class="field">
+          <label class="field-label">Inici</label>
+          <input type="date" id="date-start">
+        </div>
+        <div class="field">
+          <label class="field-label">Fi</label>
+          <input type="date" id="date-end">
+        </div>
+      </div>
+      <div id="panel-days" class="hidden">
+        <div class="field">
+          <label class="field-label">Nombre de dies</label>
+          <input type="number" id="num-days" min="1" max="30" placeholder="Ex: 7">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Transport principal del viatge</div>
+    <div class="card">
+      <div class="t-grid" id="transport-grid"></div>
+    </div>
+
+    <div class="section-label">Preferències (opcional)</div>
+    <div class="card">
+      <textarea id="prefs" rows="2" placeholder="Ex: viatgem en família, preferim natura, evitem masses turístiques..."></textarea>
+    </div>
+
+    <div class="btn-wrap">
+      <button class="btn-primary" onclick="initTrip()">Iniciar planificació →</button>
+    </div>
+  </div>
+
+  <!-- ══ PLAN ══ -->
+  <div id="plan-panel" class="hidden">
+    <div style="height:8px"></div>
+    <div class="banner" id="trip-banner"></div>
+
+    <!-- AI Suggest -->
+    <div class="section-label">Suggeriments de la IA</div>
+    <div class="card">
+      <div class="suggest-row">
+        <span class="suggest-label" id="suggest-label">Llocs recomanats</span>
+        <button class="btn-ghost" id="btn-suggest" onclick="suggestPlaces()">Suggereix</button>
+      </div>
+      <div id="suggest-out"></div>
+    </div>
+
+    <!-- Add places -->
+    <div class="section-label">Llocs que vull visitar</div>
+    <div class="card">
+      <div class="ac-wrap" id="ac-wrap">
+        <div class="ac-row">
+          <input type="text" id="new-place" placeholder="Cerca un lloc..." oninput="handleInput(this.value)" onkeydown="onPlaceKey(event)">
+          <button class="btn-ghost" onclick="addPlace()">Afegir</button>
+        </div>
+        <div class="ac-drop hidden" id="ac-drop"></div>
+      </div>
+      <div id="places-list"><div class="empty-msg">Afegeix llocs escrivint o usant els suggeriments de dalt.</div></div>
+    </div>
+
+    <div class="btn-wrap">
+      <button class="btn-primary" id="btn-generate" onclick="generateItinerary()">🗓️ Generar itinerari complet</button>
+      <div id="gen-loader" class="loader hidden"><div class="spinner"></div>Organitzant els dies...</div>
+      <div id="gen-error" class="error-box hidden"></div>
+    </div>
+
+    <!-- Itinerary output -->
+    <div id="itinerary-out"></div>
+
+    <div class="btn-wrap" id="back-btn-wrap">
+      <button class="btn-ghost btn-ghost-full" onclick="goBack()">← Tornar a la configuració</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const TRANSPORTS = [
+  { id:"peu",       label:"A peu",           icon:"🚶" },
+  { id:"bicicleta", label:"Bicicleta",        icon:"🚲" },
+  { id:"transport", label:"Transport públic", icon:"🚌" },
+  { id:"cotxe",     label:"Cotxe",            icon:"🚗" },
+  { id:"tren",      label:"Tren",             icon:"🚆" },
+  { id:"avió",      label:"Avió",             icon:"✈️" },
+  { id:"vaixell",   label:"Vaixell",          icon:"⛵" },
+];
+
+let tripMode = 'dates';
+let selectedTransport = 'cotxe';
+let places = [];
+let tripInfo = {};
+let debTimer = null;
+
+// ── Init transport grid ───────────────────────────────────────────────────────
+(function() {
+  const grid = document.getElementById('transport-grid');
+  grid.innerHTML = TRANSPORTS.map(t =>
+    `<button class="t-pill${t.id==='cotxe'?' active':''}" id="tp-${t.id}" onclick="selectTransport('${t.id}')">${t.icon} ${t.label}</button>`
+  ).join('');
+})();
+
+function selectTransport(id) {
+  selectedTransport = id;
+  TRANSPORTS.forEach(t => {
+    document.getElementById('tp-'+t.id).classList.toggle('active', t.id === id);
+  });
+}
+
+// ── Mode toggle ───────────────────────────────────────────────────────────────
+function setMode(m) {
+  tripMode = m;
+  document.getElementById('seg-dates').classList.toggle('active', m==='dates');
+  document.getElementById('seg-days').classList.toggle('active', m==='days');
+  document.getElementById('panel-dates').classList.toggle('hidden', m!=='dates');
+  document.getElementById('panel-days').classList.toggle('hidden', m!=='days');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getDays(s, e) { return Math.round((new Date(e)-new Date(s))/86400000)+1; }
+function formatDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  const mn = ['gen','feb','mar','abr','mai','jun','jul','ago','set','oct','nov','des'];
+  return `${parseInt(d)} ${mn[parseInt(m)-1]} ${y}`;
+}
+function tLabel(id) { return TRANSPORTS.find(t=>t.id===id) || {label:id,icon:''}; }
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function callClaude(prompt, maxTokens=1500) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      system: 'Respon SEMPRE amb JSON pur i vàlid, sense cap text addicional, sense markdown, sense backticks. Només el JSON.',
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  if (!r.ok) throw new Error('API error '+r.status);
+  const data = await r.json();
+  return data.content.map(b=>b.text||'').join('');
+}
+
+function parseJSON(text) {
+  let c = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  const s=c.indexOf('{'), e=c.lastIndexOf('}');
+  if(s!==-1&&e!==-1) c=c.slice(s,e+1);
+  return JSON.parse(c);
+}
+
+// ── Init trip ─────────────────────────────────────────────────────────────────
+function initTrip() {
+  const dest = document.getElementById('dest').value.trim();
+  if (!dest) { alert('Indica la destinació'); return; }
+  let days=0, dateLabel='';
+  if (tripMode==='dates') {
+    const s=document.getElementById('date-start').value;
+    const e=document.getElementById('date-end').value;
+    if(!s||!e){alert('Indica les dates');return;}
+    days=getDays(s,e);
+    if(days<1){alert('La data de fi ha de ser posterior');return;}
+    dateLabel=`${formatDate(s)} → ${formatDate(e)}`;
+    tripInfo={dest,days,dateLabel,dateStart:s,dateEnd:e,prefs:document.getElementById('prefs').value};
+  } else {
+    days=parseInt(document.getElementById('num-days').value);
+    if(!days||days<1){alert('Indica el nombre de dies');return;}
+    dateLabel=`${days} dies`;
+    tripInfo={dest,days,dateLabel,dateStart:'',dateEnd:'',prefs:document.getElementById('prefs').value};
+  }
+  const t=tLabel(selectedTransport);
+  document.getElementById('trip-banner').innerHTML=`✅ <span><strong>${dest}</strong> · ${dateLabel} · ${t.icon} ${t.label}</span>`;
+  document.getElementById('trip-badge').textContent=`${t.icon} ${dest}`;
+  document.getElementById('trip-badge').classList.remove('hidden');
+  document.getElementById('suggest-label').textContent=`Llocs recomanats per a ${dest}`;
+  document.getElementById('new-place').placeholder=`Cerca un lloc a ${dest}...`;
+  document.getElementById('setup-panel').classList.add('hidden');
+  document.getElementById('plan-panel').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  document.getElementById('plan-panel').classList.add('hidden');
+  document.getElementById('setup-panel').classList.remove('hidden');
+  document.getElementById('itinerary-out').innerHTML='';
+  document.getElementById('trip-badge').classList.add('hidden');
+  document.getElementById('back-btn-wrap').classList.remove('hidden');
+  places=[];
+  renderPlaces();
+  window.scrollTo(0,0);
+}
+
+// ── Places ────────────────────────────────────────────────────────────────────
+function addPlace(name) {
+  const n=(name||document.getElementById('new-place').value).trim();
+  if(!n) return;
+  places.push({id:Date.now(),name:n});
+  document.getElementById('new-place').value='';
+  hideAC();
+  renderPlaces();
+}
+
+function removePlace(id) {
+  places=places.filter(p=>p.id!==id);
+  renderPlaces();
+}
+
+function renderPlaces() {
+  const el=document.getElementById('places-list');
+  if(!places.length){
+    el.innerHTML='<div class="empty-msg">Afegeix llocs escrivint o usant els suggeriments de dalt.</div>';
+    return;
+  }
+  el.innerHTML=places.map((p,i)=>`
+    <div class="place-item">
+      <div class="place-num">${i+1}</div>
+      <div class="place-name">${p.name}</div>
+      <button class="btn-remove" onclick="removePlace(${p.id})">✕</button>
+    </div>`).join('');
+}
+
+function onPlaceKey(e) {
+  const drop=document.getElementById('ac-drop');
+  if(e.key==='Enter' && drop.classList.contains('hidden')) addPlace();
+  if(e.key==='Escape') hideAC();
+}
+
+// ── Autocomplete ──────────────────────────────────────────────────────────────
+function handleInput(val) {
+  document.getElementById('new-place').value=val;
+  clearTimeout(debTimer);
+  if(val.length<2){hideAC();return;}
+  debTimer=setTimeout(()=>fetchAC(val),400);
+}
+
+async function fetchAC(text) {
+  const drop=document.getElementById('ac-drop');
+  drop.classList.remove('hidden');
+  drop.innerHTML='<div class="ac-loading"><div class="spinner" style="width:14px;height:14px;border-width:2px"></div>Cercant...</div>';
+  try {
+    const prompt=`Destí: ${tripInfo.dest||'un destí turístic'}. Autocompletar: "${text}". Llista 5 llocs reals (monuments, barris, museus, restaurants famosos). JSON: {"llocs":["Lloc 1","Lloc 2","Lloc 3","Lloc 4","Lloc 5"]}`;
+    const r=await callClaude(prompt,200);
+    const d=parseJSON(r);
+    const items=d.llocs||[];
+    if(!items.length){hideAC();return;}
+    drop.innerHTML=items.map(s=>
+      `<div class="ac-item" onclick="pickAC('${s.replace(/'/g,"\\'")}')">📍 ${s}<span class="ac-badge">IA</span></div>`
+    ).join('');
+  } catch { hideAC(); }
+}
+
+function pickAC(name) { addPlace(name); }
+function hideAC() { document.getElementById('ac-drop').classList.add('hidden'); }
+
+document.addEventListener('click', e=>{
+  if(!document.getElementById('ac-wrap').contains(e.target)) hideAC();
+});
+
+// ── AI Suggest ────────────────────────────────────────────────────────────────
+async function suggestPlaces() {
+  const btn=document.getElementById('btn-suggest');
+  const out=document.getElementById('suggest-out');
+  btn.disabled=true; btn.textContent='...';
+  out.innerHTML='<div class="loader"><div class="spinner"></div>Cercant llocs recomanats...</div>';
+  try {
+    const t=tLabel(selectedTransport);
+    const prompt=`Viatge a ${tripInfo.dest}, ${tripInfo.days} dies, transport: ${t.label}. ${tripInfo.prefs?'Preferències: '+tripInfo.prefs:''}
+Suggereix 8 llocs interessants. JSON: {"llocs":[{"nom":"...","desc":"..."}]}`;
+    const r=await callClaude(prompt,600);
+    const d=parseJSON(r);
+    const llocs=d.llocs||[];
+    out.innerHTML=`<div class="ac-hint">Clica per afegir a la teva ruta:</div><div class="chip-row">${
+      llocs.map(l=>`<button class="chip" title="${l.desc||''}" onclick="addPlace('${l.nom.replace(/'/g,"\\'")}')">+ ${l.nom}</button>`).join('')
+    }</div>`;
+  } catch(e) {
+    out.innerHTML='<div class="error-box">Error obtenint suggeriments. Torna-ho a intentar.</div>';
+  } finally { btn.disabled=false; btn.textContent='Suggereix'; }
+}
+
+// ── Generate itinerary ────────────────────────────────────────────────────────
+async function generateItinerary() {
+  const errEl=document.getElementById('gen-error');
+  const loader=document.getElementById('gen-loader');
+  const btn=document.getElementById('btn-generate');
+  const out=document.getElementById('itinerary-out');
+
+  if(!places.length){errEl.textContent='Afegeix algun lloc primer.';errEl.classList.remove('hidden');return;}
+  errEl.classList.add('hidden');
+  loader.classList.remove('hidden');
+  btn.disabled=true;
+  out.innerHTML='';
+  document.getElementById('back-btn-wrap').classList.add('hidden');
+
+  const t=tLabel(selectedTransport);
+  const placesList=places.map((p,i)=>`${i+1}. ${p.name}`).join('\n');
+  const dateStr=tripInfo.dateStart?`del ${tripInfo.dateStart} al ${tripInfo.dateEnd}`:`durant ${tripInfo.days} dies`;
+
+  const prompt=`Viatge a ${tripInfo.dest} ${dateStr}, transport: ${t.label}. ${tripInfo.prefs?'Preferències: '+tripInfo.prefs:''}
+Llocs: ${placesList}
+Crea itinerari dia a dia distribuint llocs lògicament. Afegeix àpats si escau.
+JSON: {"dies":[{"dia":1,"titol":"...","data":"${tripInfo.dateStart||''}","parades":[{"hora":"09:00","icona":"🏛️","nom":"...","desc":"...","transport_fins":"..."}]}]}
+transport_fins buit per la 1a parada del dia.`;
+
+  try {
+    const r=await callClaude(prompt,3000);
+    const d=parseJSON(r);
+    if(!d.dies||!Array.isArray(d.dies)) throw new Error('Format invàlid');
+    renderItinerary(d.dies);
+  } catch(e) {
+    errEl.textContent='Error generant l\'itinerari: '+e.message+'. Torna-ho a intentar.';
+    errEl.classList.remove('hidden');
+    document.getElementById('back-btn-wrap').classList.remove('hidden');
+  } finally { loader.classList.add('hidden'); btn.disabled=false; }
+}
+
+function renderItinerary(dies) {
+  const out=document.getElementById('itinerary-out');
+  const sl=document.createElement('div');
+  sl.className='section-label';
+  sl.textContent=`El teu itinerari · ${tripInfo.dest}`;
+  out.appendChild(sl);
+
+  dies.forEach(d=>{
+    const card=document.createElement('div');
+    card.className='day-card';
+    const dateHtml=d.data?`<div class="day-date">${formatDate(d.data)}</div>`:'';
+    const parades=(d.parades||[]).map(p=>`
+      <div class="stop">
+        <div class="stop-ico">${p.icona||'📍'}</div>
+        <div class="stop-body">
+          <div class="stop-top">
+            <div class="stop-name">${p.nom}</div>
+            ${p.hora?`<div class="stop-hora">${p.hora}</div>`:''}
+          </div>
+          <div class="stop-desc">${p.desc||''}</div>
+          ${p.transport_fins?`<div class="stop-transp">→ ${p.transport_fins}</div>`:''}
+        </div>
+      </div>`).join('');
+    card.innerHTML=`
+      <div class="day-head">
+        <div class="day-n">${d.dia}</div>
+        <div><div class="day-title">${d.titol||'Dia '+d.dia}</div>${dateHtml}</div>
+      </div>${parades}`;
+    out.appendChild(card);
+  });
+
+  const bw=document.createElement('div');
+  bw.className='btn-wrap';
+  bw.innerHTML='<button class="btn-primary" onclick="newTrip()">✈️ Planificar nou viatge</button>';
+  out.appendChild(bw);
+  document.getElementById('back-btn-wrap').classList.add('hidden');
+  out.scrollIntoView({behavior:'smooth'});
+}
+
+function newTrip() {
+  document.getElementById('plan-panel').classList.add('hidden');
+  document.getElementById('setup-panel').classList.remove('hidden');
+  document.getElementById('itinerary-out').innerHTML='';
+  document.getElementById('suggest-out').innerHTML='';
+  document.getElementById('trip-badge').classList.add('hidden');
+  document.getElementById('back-btn-wrap').classList.remove('hidden');
+  document.getElementById('gen-error').classList.add('hidden');
+  places=[];
+  renderPlaces();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
